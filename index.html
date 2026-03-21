@@ -49,6 +49,11 @@
         .links { background: var(--bg); border-radius: 12px; padding: 16px; }
         .links a { display: block; padding: 8px 0; color: var(--primary); text-decoration: none; font-size: 14px; }
         .links a:hover { text-decoration: underline; }
+        .preset-grid, .history-list { display:grid; gap:10px; }
+        .preset-btn { text-align:left; padding:12px 14px; border:1px solid var(--border); background:#fff; border-radius:12px; cursor:pointer; }
+        .preset-btn:hover { border-color: var(--primary); }
+        .note-box { padding:16px; background: rgba(0,113,227,0.06); border-radius:12px; font-size:14px; line-height:1.7; }
+        .brief-box { white-space:pre-wrap; background:var(--bg); border-radius:12px; padding:16px; font-size:14px; line-height:1.8; }
         
         .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
         .tab { flex: 1; padding: 12px; background: var(--bg); border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
@@ -73,6 +78,13 @@
             
             <div class="tab-content active" id="tab-search">
                 <input type="text" id="keyword" placeholder="輸入關鍵字，例如：文字轉語音、TTS app、有聲書..." style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:16px;margin-bottom:16px;">
+
+                <div style="font-size:14px;font-weight:600;margin-bottom:8px;">常用研究預設：</div>
+                <div class="preset-grid" style="margin-bottom:16px;">
+                    <button class="preset-btn" onclick="applyPreset('pain')">Pain Hunt：找抱怨 / 負評 / 替代品需求</button>
+                    <button class="preset-btn" onclick="applyPreset('comparison')">Comparison：找比較文 / alternatives / vs</button>
+                    <button class="preset-btn" onclick="applyPreset('buying')">Buying Intent：找購買意圖 / 推薦請求</button>
+                </div>
                 
                 <div style="font-size:14px;font-weight:600;margin-bottom:8px;">選擇平台：</div>
                 <div class="platforms">
@@ -85,17 +97,26 @@
                 </div>
                 
                 <button class="btn btn-primary" onclick="startResearch()">開始市場調查</button>
+                <button class="btn" style="margin-top:10px;background:#111827;color:#fff;" onclick="saveResearchSession()">保存這次研究 Session</button>
             </div>
             
             <div class="tab-content" id="tab-results">
                 <div id="resultsContent">
                     <div style="text-align:center;padding:40px;color:var(--text2)">請先進行搜尋</div>
                 </div>
+                <div style="margin-top:16px;" class="note-box">
+                    這個工具目前是 research workspace：幫你快速建立搜尋入口、痛點框架、研究 brief 與 session 保存。下一階段若接 API，可自動抓取與摘要真實內容。
+                </div>
+                <div style="margin-top:16px;">
+                    <div class="section-title">🗂️ 已保存的 Research Sessions</div>
+                    <div id="historyList" class="history-list"></div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
+        const STORAGE_KEY = 'market-research-sessions-v1';
         const PLATFORMS = {
             ptt: { name: "PTT", search: "https://www.google.com/search?q=site:ptt.cc {keyword}" },
             dcard: { name: "Dcard", search: "https://www.google.com/search?q=site:dcard.tw {keyword}" },
@@ -105,11 +126,38 @@
             g2: { name: "G2", search: "https://www.g2.com/search?query={keyword}" }
         };
         
+        const state = { lastResearch: null, sessions: loadSessions() };
+
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
+            if (window.event?.target?.classList?.contains('tab')) {
+                window.event.target.classList.add('active');
+            } else {
+                document.querySelector(`.tab[onclick*="${tab}"]`)?.classList.add('active');
+            }
             document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        function loadSessions() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function persistSessions() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.sessions));
+        }
+
+        function applyPreset(type) {
+            const keyword = document.getElementById('keyword');
+            const current = keyword.value.trim();
+            if (!current) {
+                alert('請先輸入主題關鍵字');
+                return;
+            }
+            if (type === 'pain') keyword.value = `${current} 痛點 抱怨 缺點 替代`; 
+            if (type === 'comparison') keyword.value = `${current} alternative vs 比較 推薦`; 
+            if (type === 'buying') keyword.value = `${current} 推薦 值得買 評價`; 
         }
         
         function togglePlatform(btn) {
@@ -146,23 +194,26 @@
             
             // 模擬分析結果（實際需要 AI API）
             const painPoints = [
-                "價格太高，付費版太貴",
-                "功能太少，無法離線使用",
-                "轉換速度慢，長文章要等很久",
-                "聲音不自然，像機器人",
-                "沒有行動版 App"
+                `${keyword} 價格是否偏高？`,
+                `${keyword} 是否缺少關鍵功能或整合？`,
+                `${keyword} 速度 / 品質 / 穩定性是否被抱怨？`,
+                `${keyword} 是否缺少 mobile / offline / collaboration 能力？`,
+                `${keyword} 是否存在學習成本或 onboarding 問題？`
             ];
             
             const positives = [
-                "介面簡單易上手",
-                "免費版夠用",
-                "支援多種語言",
-                "轉換速度快",
-                "整體CP值不錯"
+                `${keyword} 是否有明確價值主張`,
+                `${keyword} 是否有使用者認為省時省力`,
+                `${keyword} 是否有特定場景特別被稱讚`,
+                `${keyword} 是否有定價或免費方案優勢`,
+                `${keyword} 是否有介面或速度優勢`
             ];
             
-            const sentiment = Math.floor(Math.random() * 30) + 40; // 40-70
+            const sentiment = Math.max(35, Math.min(78, 55 + (platforms.length * 3) - Math.floor(keyword.length / 6)));
             
+            const researchBrief = buildResearchBrief(keyword, platforms, painPoints, positives, sentiment);
+            state.lastResearch = { keyword, platforms, painPoints, positives, sentiment, brief: researchBrief, createdAt: new Date().toISOString() };
+
             const resultsHtml = `
                 <div class="section-title">📈 情感分析</div>
                 <div class="sentiment-bar">
@@ -182,11 +233,14 @@
                 
                 <div class="section-title" style="margin-top:24px">💡 建議</div>
                 <div class="item">
-                    <strong>1. 定價策略：</strong>考慮提供更實惠的方案<br>
-                    <strong>2. 功能改進：</strong>增加離線功能<br>
-                    <strong>3. 品質提升：</strong>優化聲音自然度<br>
-                    <strong>4. 平台擴展：</strong>開發行動版 App
+                    <strong>1. 定價策略：</strong>先驗證使用者最常抱怨的價格 / 功能缺口<br>
+                    <strong>2. 功能改進：</strong>聚焦最常見 workflow friction 與 missing feature<br>
+                    <strong>3. 品質提升：</strong>記錄品質、速度、穩定性相關抱怨比例<br>
+                    <strong>4. 產品定位：</strong>區分你是在做替代品、升級版，還是垂直場景工具
                 </div>
+
+                <div class="section-title" style="margin-top:24px">🧠 Research Brief</div>
+                <div class="brief-box">${researchBrief}</div>
                 
                 ${linksHtml}
                 
@@ -196,8 +250,64 @@
             `;
             
             document.getElementById('resultsContent').innerHTML = resultsHtml;
+            renderHistory();
             switchTab('results');
         }
+
+        function buildResearchBrief(keyword, platforms, painPoints, positives, sentiment) {
+            return [
+                `研究主題：${keyword}`,
+                `平台：${platforms.map(p => PLATFORMS[p]?.name || p).join(' / ')}`,
+                `情感分數：${sentiment}/100`,
+                '',
+                '核心假設：',
+                `- 使用者正在尋找 ${keyword} 的更好替代方案或更明確價值。`,
+                '',
+                '優先驗證的痛點：',
+                ...painPoints.map((p, i) => `${i + 1}. ${p}`),
+                '',
+                '可追問的正向訊號：',
+                ...positives.map((p, i) => `${i + 1}. ${p}`),
+            ].join('\n');
+        }
+
+        function saveResearchSession() {
+            if (!state.lastResearch) {
+                alert('請先完成一次市場調查');
+                return;
+            }
+            state.sessions.unshift({ id: Date.now(), ...state.lastResearch });
+            state.sessions = state.sessions.slice(0, 20);
+            persistSessions();
+            renderHistory();
+            switchTab('results');
+        }
+
+        function renderHistory() {
+            const el = document.getElementById('historyList');
+            if (!state.sessions.length) {
+                el.innerHTML = '<div class="item">尚未保存任何 research session</div>';
+                return;
+            }
+            el.innerHTML = state.sessions.map(session => `
+                <div class="item">
+                    <strong>${escapeHtml(session.keyword)}</strong><br>
+                    <span style="color:var(--text2);font-size:12px;">${new Date(session.createdAt).toLocaleString('zh-TW')}｜${escapeHtml(session.platforms.join(', '))}</span><br>
+                    <div style="margin-top:8px;white-space:pre-wrap;">${escapeHtml(session.brief.split('\n').slice(0,6).join('\n'))}</div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        renderHistory();
     </script>
 </body>
 </html>
