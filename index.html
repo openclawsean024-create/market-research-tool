@@ -3,201 +3,583 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>市場調查工具 - Market Research</title>
+    <title>市場研究論壇 - Market Research Forum</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #0071e3; --accent: #34c759; --danger: #ff3b30; --warning: #ff9500; --text: #1d1d1f; --text2: #86868b; --bg: #f5f5f7; --card: #fff; --border: #d2d2d7; }
-        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
-        
-        .container { max-width: 900px; margin: 0 auto; }
-        
-        .header { text-align: center; margin-bottom: 24px; }
-        .header h1 { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header p { color: var(--text2); margin-top: 8px; }
-        
-        .card { background: var(--card); border-radius: 20px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-        
-        .search-box { display: flex; gap: 12px; margin-bottom: 16px; }
-        .search-box input { flex: 1; padding: 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 16px; }
-        .search-box input:focus { outline: none; border-color: var(--primary); }
-        
-        .platforms { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-        .platform-btn { padding: 8px 16px; background: var(--bg); border: 2px solid var(--border); border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        .platform-btn:hover { border-color: var(--primary); }
-        .platform-btn.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
-        
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        
-        /* Results */
-        .result-section { display: none; }
-        .result-section.show { display: block; }
-        
-        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        
-        .pain-points, .positive { padding: 16px; border-radius: 12px; margin-bottom: 12px; }
-        .pain-points { background: rgba(255,59,48,0.1); }
-        .positive { background: rgba(52,199,89,0.1); }
-        
-        .item { padding: 10px; background: var(--card); border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
-        
-        .sentiment-bar { height: 24px; background: var(--border); border-radius: 12px; overflow: hidden; margin: 16px 0; }
-        .sentiment-fill { height: 100%; background: linear-gradient(90deg, var(--danger), var(--warning), var(--accent)); width: 0%; transition: width 0.5s; }
-        .sentiment-score { text-align: center; font-size: 24px; font-weight: 700; }
-        
-        .links { background: var(--bg); border-radius: 12px; padding: 16px; }
-        .links a { display: block; padding: 8px 0; color: var(--primary); text-decoration: none; font-size: 14px; }
-        .links a:hover { text-decoration: underline; }
-        
-        .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-        .tab { flex: 1; padding: 12px; background: var(--bg); border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
-        .tab.active { background: var(--primary); color: #fff; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        :root {
+            --primary: #0071e3;
+            --accent: #34c759;
+            --danger: #ff3b30;
+            --warning: #ff9500;
+            --purple: #af52de;
+            --text: #1d1d1f;
+            --text2: #86868b;
+            --bg: #f5f5f7;
+            --card: #fff;
+            --border: #d2d2d7;
+            --shadow: 0 4px 20px rgba(0,0,0,0.06);
+            --radius: 20px;
+        }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Header */
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-logo { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .topbar-actions { display: flex; gap: 12px; }
+        .topbar-btn { padding: 8px 16px; border-radius: 20px; border: 2px solid var(--border); background: var(--card); font-size: 14px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .topbar-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .topbar-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        /* Container */
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ─── Home: Hero + Filter ─── */
+        .hero { text-align: center; padding: 40px 0 32px; }
+        .hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .hero p { color: var(--text2); font-size: 16px; }
+
+        .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; align-items: center; }
+        .filter-tag { padding: 6px 14px; border-radius: 20px; border: 2px solid var(--border); background: var(--card); font-size: 13px; cursor: pointer; transition: 0.2s; }
+        .filter-tag:hover { border-color: var(--primary); }
+        .filter-tag.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .filter-search { flex: 1; min-width: 200px; padding: 8px 16px; border: 2px solid var(--border); border-radius: 20px; font-size: 14px; background: var(--card); }
+        .filter-search:focus { outline: none; border-color: var(--primary); }
+
+        /* ─── News Card Grid ─── */
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .news-card { background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+        .news-card-img { width: 100%; height: 180px; object-fit: cover; background: linear-gradient(135deg, #667eea22, #764ba222); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+        .news-card-img img { width: 100%; height: 100%; object-fit: cover; }
+        .news-card-body { padding: 20px; }
+        .news-card-meta { display: flex; gap: 12px; margin-bottom: 10px; }
+        .news-card-tag { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .news-card-tag.tech { background: #0071e322; color: var(--primary); }
+        .news-card-tag.product { background: #af52de22; color: var(--purple); }
+        .news-card-tag.market { background: #34c75922; color: var(--accent); }
+        .news-card-tag.trend { background: #ff950022; color: var(--warning); }
+        .news-card-date { font-size: 12px; color: var(--text2); }
+        .news-card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+        .news-card-summary { font-size: 14px; color: var(--text2); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .news-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .news-card-source { font-size: 12px; color: var(--text2); }
+        .news-card-readmore { font-size: 13px; color: var(--primary); font-weight: 600; }
+
+        /* ─── Detail View ─── */
+        .detail-header { margin-bottom: 24px; }
+        .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 20px; border: 2px solid var(--border); background: var(--card); font-size: 14px; cursor: pointer; transition: 0.2s; margin-bottom: 20px; }
+        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .detail-hero-img { width: 100%; height: 360px; object-fit: cover; border-radius: var(--radius); margin-bottom: 24px; background: linear-gradient(135deg, #667eea22, #764ba222); display: flex; align-items: center; justify-content: center; font-size: 80px; }
+        .detail-hero-img img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
+        .detail-title { font-size: 28px; font-weight: 700; line-height: 1.3; margin-bottom: 16px; }
+        .detail-meta { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+        .detail-date, .detail-source, .detail-author { font-size: 14px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+        .detail-body { font-size: 16px; line-height: 1.8; color: var(--text); }
+        .detail-body p { margin-bottom: 16px; }
+        .detail-body h2 { font-size: 20px; font-weight: 700; margin: 24px 0 12px; }
+        .detail-body ul { padding-left: 24px; margin-bottom: 16px; }
+        .detail-body li { margin-bottom: 8px; }
+        .detail-body blockquote { border-left: 4px solid var(--primary); padding: 12px 20px; background: var(--bg); border-radius: 0 12px 12px 0; margin: 16px 0; font-style: italic; color: var(--text2); }
+        .detail-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
+        .detail-tag { padding: 6px 14px; border-radius: 20px; background: var(--bg); font-size: 13px; color: var(--text2); }
+
+        /* ─── Add News Modal ─── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: var(--card); border-radius: var(--radius); padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+        .modal h2 { font-size: 22px; margin-bottom: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text2); }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 12px; font-size: 15px; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .modal-btn.cancel { background: var(--bg); color: var(--text); }
+        .modal-btn.submit { background: var(--primary); color: #fff; }
+        .modal-btn.delete { background: var(--danger); color: #fff; }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); }
+        .empty-state .emoji { font-size: 64px; margin-bottom: 16px; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 14px 24px; border-radius: 12px; font-size: 14px; z-index: 300; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--accent); }
+        .toast.error { background: var(--danger); }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .topbar { padding: 0 16px; }
+            .container { padding: 16px; }
+            .news-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 24px; }
+            .detail-title { font-size: 22px; }
+            .detail-hero-img { height: 220px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>市場調查工具</h1>
-            <p>搜尋論壇社群，分析消費者痛點</p>
+
+<!-- Top Bar -->
+<nav class="topbar">
+    <div class="topbar-logo">📊 市場研究論壇</div>
+    <div class="topbar-actions">
+        <button class="topbar-btn" onclick="showAddModal()">＋ 新增新聞</button>
+        <button class="topbar-btn primary" onclick="goHome()">🏠 首頁</button>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- ─── Home View ─── -->
+    <div id="view-home" class="view active">
+        <div class="hero">
+            <h1>📰 市場研究論壇</h1>
+            <p>每日精選市場動態情報</p>
         </div>
-        
-        <div class="card">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('search')">🔍 搜尋</button>
-                <button class="tab" onclick="switchTab('results')">📊 結果</button>
-            </div>
-            
-            <div class="tab-content active" id="tab-search">
-                <input type="text" id="keyword" placeholder="輸入關鍵字，例如：文字轉語音、TTS app、有聲書..." style="width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;font-size:16px;margin-bottom:16px;">
-                
-                <div style="font-size:14px;font-weight:600;margin-bottom:8px;">選擇平台：</div>
-                <div class="platforms">
-                    <button class="platform-btn selected" data-platform="ptt" onclick="togglePlatform(this)">PTT</button>
-                    <button class="platform-btn selected" data-platform="dcard" onclick="togglePlatform(this)">Dcard</button>
-                    <button class="platform-btn selected" data-platform="reddit" onclick="togglePlatform(this)">Reddit</button>
-                    <button class="platform-btn selected" data-platform="mobile01" onclick="togglePlatform(this)">Mobile01</button>
-                    <button class="platform-btn" data-platform="trustpilot" onclick="togglePlatform(this)">Trustpilot</button>
-                    <button class="platform-btn" data-platform="g2" onclick="togglePlatform(this)">G2</button>
-                </div>
-                
-                <button class="btn btn-primary" onclick="startResearch()">開始市場調查</button>
-            </div>
-            
-            <div class="tab-content" id="tab-results">
-                <div id="resultsContent">
-                    <div style="text-align:center;padding:40px;color:var(--text2)">請先進行搜尋</div>
-                </div>
-            </div>
+
+        <div class="filter-bar">
+            <input type="text" class="filter-search" placeholder="🔍 搜尋新聞標題或內容..." id="searchInput" oninput="renderCards()">
+            <button class="filter-tag active" data-cat="all" onclick="setCategory(this)">全部</button>
+            <button class="filter-tag" data-cat="tech" onclick="setCategory(this)">科技</button>
+            <button class="filter-tag" data-cat="product" onclick="setCategory(this)">產品</button>
+            <button class="filter-tag" data-cat="market" onclick="setCategory(this)">市場</button>
+            <button class="filter-tag" data-cat="trend" onclick="setCategory(this)">趨勢</button>
+        </div>
+
+        <div id="newsGrid" class="news-grid"></div>
+        <div id="emptyState" class="empty-state" style="display:none">
+            <div class="emoji">🔍</div>
+            <div>找不到符合的新聞</div>
         </div>
     </div>
-    
-    <script>
-        const PLATFORMS = {
-            ptt: { name: "PTT", search: "https://www.google.com/search?q=site:ptt.cc {keyword}" },
-            dcard: { name: "Dcard", search: "https://www.google.com/search?q=site:dcard.tw {keyword}" },
-            reddit: { name: "Reddit", search: "https://www.reddit.com/search/?q={keyword}" },
-            mobile01: { name: "Mobile01", search: "https://www.google.com/search?q=site:mobile01.com {keyword}" },
-            trustpilot: { name: "Trustpilot", search: "https://www.trustpilot.com/search?query={keyword}" },
-            g2: { name: "G2", search: "https://www.g2.com/search?query={keyword}" }
-        };
-        
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('tab-' + tab).classList.add('active');
+
+    <!-- ─── Detail View ─── -->
+    <div id="view-detail" class="view">
+        <button class="back-btn" onclick="goHome()">← 返回列表</button>
+        <div id="detailContent"></div>
+    </div>
+
+</div>
+
+<!-- Add/Edit News Modal -->
+<div class="modal-overlay" id="newsModal">
+    <div class="modal">
+        <h2 id="modalTitle">新增新聞</h2>
+        <input type="hidden" id="editId">
+        <div class="form-group">
+            <label>標題 *</label>
+            <input type="text" id="fTitle" placeholder="新聞標題">
+        </div>
+        <div class="form-group">
+            <label>摘要（卡片顯示） *</label>
+            <textarea id="fSummary" placeholder="摘要說明，會在卡片上顯示"></textarea>
+        </div>
+        <div class="form-group">
+            <label>完整內容（支援 HTML）</label>
+            <textarea id="fContent" placeholder="完整文章內容，可使用 HTML 格式"></textarea>
+        </div>
+        <div class="form-group">
+            <label>圖片網址</label>
+            <input type="text" id="fImage" placeholder="https://...">
+        </div>
+        <div class="form-group">
+            <label>分類</label>
+            <select id="fCategory">
+                <option value="tech">科技</option>
+                <option value="product">產品</option>
+                <option value="market">市場</option>
+                <option value="trend">趨勢</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>來源</label>
+            <input type="text" id="fSource" placeholder="例如：Inside, TechCrunch, 天下雜誌">
+        </div>
+        <div class="form-group">
+            <label>作者</label>
+            <input type="text" id="fAuthor" placeholder="作者名稱">
+        </div>
+        <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="fDate">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+            <button class="modal-btn delete" id="deleteBtn" style="display:none" onclick="deleteNews()">刪除</button>
+            <button class="modal-btn submit" onclick="saveNews()">儲存</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Data Store ───
+const STORAGE_KEY = 'forum_news_v1';
+
+const DEFAULT_NEWS = [
+    {
+        id: 1,
+        title: "OpenAI 發布 GPT-5：多模態能力全面提升，顛覆內容創作產業",
+        summary: "GPT-5 帶來革命性的多模態理解能力，不僅能處理文字，還能深度理解影像、音頻和影片，為內容創作產業開闢全新可能。",
+        content: `<p>OpenAI 正式發布 GPT-5，這是一款具有革命性意義的多模態 AI 模型。</p>
+<h2>主要突破</h2>
+<ul>
+<li>原生支援文字、圖片、音頻、影片統一處理</li>
+<li>上下文窗口擴展至 200 萬 tokens</li>
+<li>推理速度較 GPT-4 提升 300%</li>
+<li>事實準確率達到 98.7%</li>
+</ul>
+<h2>對產業的影響</h2>
+<p>內容創作、行銷文案、教育等領域將受到最大衝擊。許多企業已開始評估用 AI 取代部分人力。</p>
+<blockquote>「GPT-5 代表了我們在通用人工智慧道路上的重大一步」—— Sam Altman</blockquote>
+<p>專家預測，未來 3 年內，80% 的基礎內容創作將由 AI 輔助完成。</p>`,
+        image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+        category: "tech",
+        source: "Inside",
+        author: "小明",
+        date: "2026-03-25",
+        tags: ["AI", "OpenAI", "GPT-5"]
+    },
+    {
+        id: 2,
+        title: "Tesla Robotaxi 正式上路：舊金山全區開放乘坐",
+        summary: "Tesla 的 Robotaxi 服務正式在舊金山全面開放，無需司機即可搭乘，引發傳統計程車業界劇烈反應。",
+        content: `<p>Tesla 今日宣布 Robotaxi 服務在舊金山正式全面營運，所有市民均可透過 Tesla App 叫車。</p>
+<h2>服務詳情</h2>
+<ul>
+<li>覆蓋範圍：舊金山全市 1200 平方公里</li>
+<li>收費標準：比 Uber 便宜 40%</li>
+<li>目前車隊規模：5000 輛</li>
+<li>預計 2026 年底擴展至全美 20 城市</li>
+</ul>
+<h2>法規挑戰</h2>
+<p>儘管服務已上線，相關法規仍在討論中。加州政府已成立專案小組監管自動駕駛載客服務。</p>`,
+        image: "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=80",
+        category: "trend",
+        source: "TechCrunch",
+        author: "大雄",
+        date: "2026-03-24",
+        tags: ["Tesla", "自動駕駛", "Robotaxi"]
+    },
+    {
+        id: 3,
+        title: "Notion 推出 AI 工作區：企業版整合 GPT-5 助理",
+        summary: "Notion 宣布企業版重大更新，將 GPT-5 深度整合至工作區，提供會議摘要、任務追蹤、知識庫問答等 AI 功能。",
+        content: `<p>Notion 正式推出企業版 AI 工作區，大幅提升團隊協作效率。</p>
+<h2>新功能一覽</h2>
+<ul>
+<li>AI 會議助理：自動錄音、摘要、生成待辦事項</li>
+<li>智慧知識庫：自然語言查詢公司文件</li>
+<li>專案進度追蹤：AI 自動識別風險並預警</li>
+<li>跨工具整合：支援 Slack、GitHub、Jira 同步</li>
+</ul>`,
+        image: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=800&q=80",
+        category: "product",
+        source: "天下雜誌",
+        author: "阿美",
+        date: "2026-03-23",
+        tags: ["Notion", "AI", "企業工具"]
+    },
+    {
+        id: 4,
+        title: "2026 Q1 全球 AI 晶片市場報告：NVIDIA 市佔突破 85%",
+        summary: "最新報告顯示，NVIDIA 在 AI 加速器市場的領導地位持續強化，AMD 和 Intel 苦苦追趕，生態系統成關鍵壁壘。",
+        content: `<p>根據最新數據，NVIDIA 在 2026 年 Q1 的 AI 晶片市場市佔率已達 85%。</p>
+<h2>市場概況</h2>
+<ul>
+<li>NVIDIA：85%（主要供應 H100/H200 系列）</li>
+<li>AMD：8%（MI300X 逐漸獲得青睞）</li>
+<li>Intel：4%（Gaudi 3 表現低於預期）</li>
+<li>其他：3%（包括中國本土晶片）</li>
+</ul>
+<h2>關鍵觀察</h2>
+<p>CUDA 生態系統成為 NVIDIA 最強大的護城河。即使硬體規格相近，開發者仍偏好 NVIDIA 平台。</p>`,
+        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80",
+        category: "market",
+        source: "Bloomberg",
+        author: "約翰",
+        date: "2026-03-22",
+        tags: ["NVIDIA", "AI晶片", "市場報告"]
+    },
+    {
+        id: 5,
+        title: "Apple Vision Pro 2 曝光：更輕、更便宜，瞄準大眾市場",
+        summary: "供應鏈消息指出 Apple Vision Pro 2 將於下半年發布，重量減少 30%，價格預計降至 1999 美元，瞄準消費級市場。",
+        content: `<p>根據供應鏈知情人士透露，Apple Vision Pro 2 正在加緊量產中。</p>
+<h2>預期規格</h2>
+<ul>
+<li>重量：從 453g 降至 320g</li>
+<li>價格：1999 美元（僅為第一代一半）</li>
+<li>晶片：M4 升級版</li>
+<li>電池：整合至頭帶，擺脫外接電池</li>
+</ul>`,
+        image: "https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=800&q=80",
+        category: "tech",
+        source: "MacRumors",
+        author: "庫克",
+        date: "2026-03-21",
+        tags: ["Apple", "Vision Pro", "VR/AR"]
+    },
+    {
+        id: 6,
+        title: "中小型企業 AI 採用率突破 60%：行銷與客服應用最熱門",
+        summary: "調查顯示台灣中小型企業 AI 採用率在 2026 年大幅提升，行銷內容生成和客服回覆是最主要應用場景。",
+        content: `<p>最新調查顯示，台灣中小型企業的 AI 採用率已突破 60%。</p>
+<h2>應用場景分布</h2>
+<ul>
+<li>行銷內容生成：78%</li>
+<li>客服回覆輔助：65%</li>
+<li>文件與報告撰寫：52%</li>
+<li>數據分析：41%</li>
+<li>產品推薦：28%</li>
+</ul>
+<h2>主要障礙</h2>
+<p>成本、法規合規性、以及員工培訓仍是最大挑戰。</p>`,
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+        category: "market",
+        source: "數位時代",
+        author: "美玲",
+        date: "2026-03-20",
+        tags: ["AI採用", "中小型企業", "台灣"]
+    }
+];
+
+let news = [];
+let currentCategory = 'all';
+let editingId = null;
+
+// ─── Init ───
+function init() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        try {
+            news = JSON.parse(stored);
+        } catch {
+            news = DEFAULT_NEWS;
         }
-        
-        function togglePlatform(btn) {
-            btn.classList.toggle('selected');
-        }
-        
-        function getSelectedPlatforms() {
-            return Array.from(document.querySelectorAll('.platform-btn.selected')).map(b => b.dataset.platform);
-        }
-        
-        function startResearch() {
-            const keyword = document.getElementById('keyword').value.trim();
-            if (!keyword) {
-                alert('請輸入關鍵字');
-                return;
-            }
-            
-            const platforms = getSelectedPlatforms();
-            if (platforms.length === 0) {
-                alert('請選擇至少一個平台');
-                return;
-            }
-            
-            // 生成搜尋連結
-            let linksHtml = '<div class="links"><div style="font-weight:600;margin-bottom:12px;">🔗 搜尋連結：</div>';
-            
-            platforms.forEach(pf => {
-                if (PLATFORMS[pf]) {
-                    const url = PLATFORMS[pf].search.replace('{keyword}', encodeURIComponent(keyword));
-                    linksHtml += `<a href="${url}" target="_blank">📱 ${PLATFORMS[pf].name} - 搜尋 ${keyword}</a>`;
-                }
-            });
-            linksHtml += '</div>';
-            
-            // 模擬分析結果（實際需要 AI API）
-            const painPoints = [
-                "價格太高，付費版太貴",
-                "功能太少，無法離線使用",
-                "轉換速度慢，長文章要等很久",
-                "聲音不自然，像機器人",
-                "沒有行動版 App"
-            ];
-            
-            const positives = [
-                "介面簡單易上手",
-                "免費版夠用",
-                "支援多種語言",
-                "轉換速度快",
-                "整體CP值不錯"
-            ];
-            
-            const sentiment = Math.floor(Math.random() * 30) + 40; // 40-70
-            
-            const resultsHtml = `
-                <div class="section-title">📈 情感分析</div>
-                <div class="sentiment-bar">
-                    <div class="sentiment-fill" style="width: ${sentiment}%"></div>
+    } else {
+        news = DEFAULT_NEWS;
+        saveNewsToStorage();
+    }
+    handleRoute();
+    window.addEventListener('hashchange', handleRoute);
+}
+
+// ─── Routing ───
+function handleRoute() {
+    const hash = window.location.hash;
+    if (hash.startsWith('#/news/')) {
+        const id = parseInt(hash.split('/')[2]);
+        showDetail(id);
+    } else {
+        goHome();
+    }
+}
+
+// ─── Render Cards ───
+function renderCards() {
+    const grid = document.getElementById('newsGrid');
+    const empty = document.getElementById('emptyState');
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    let filtered = news.filter(n => {
+        const matchCat = currentCategory === 'all' || n.category === currentCategory;
+        const matchSearch = !search || n.title.toLowerCase().includes(search) || n.summary.toLowerCase().includes(search);
+        return matchCat && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+
+    // Sort by date descending
+    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const tagLabels = { tech: '科技', product: '產品', market: '市場', trend: '趨勢' };
+    const tagClass = { tech: 'tech', product: 'product', market: 'market', trend: 'trend' };
+
+    grid.innerHTML = filtered.map(n => `
+        <div class="news-card" onclick="navigateTo(${n.id})">
+            <div class="news-card-img">
+                ${n.image ? `<img src="${n.image}" alt="${n.title}" onerror="this.style.display='none';this.parentElement.innerHTML='📰'">` : '📰'}
+            </div>
+            <div class="news-card-body">
+                <div class="news-card-meta">
+                    <span class="news-card-tag ${tagClass[n.category]}">${tagLabels[n.category]}</span>
+                    <span class="news-card-date">${n.date}</span>
                 </div>
-                <div class="sentiment-score">${sentiment}/100 <span style="font-size:14px;font-weight:400;color:var(--text2)">${sentiment > 60 ? '正面較多' : sentiment > 40 ? '中性' : '負面較多'}</span></div>
-                
-                <div class="section-title" style="margin-top:24px">❌ 消費者痛點 (${painPoints.length})</div>
-                <div class="pain-points">
-                    ${painPoints.map(p => `<div class="item">⚠️ ${p}</div>`).join('')}
+                <div class="news-card-title">${n.title}</div>
+                <div class="news-card-summary">${n.summary}</div>
+                <div class="news-card-footer">
+                    <span class="news-card-source">${n.source || '市場研究論壇'}</span>
+                    <span class="news-card-readmore">閱讀全文 →</span>
                 </div>
-                
-                <div class="section-title">✅ 正面評價 (${positives.length})</div>
-                <div class="positive">
-                    ${positives.map(p => `<div class="item">✨ ${p}</div>`).join('')}
-                </div>
-                
-                <div class="section-title" style="margin-top:24px">💡 建議</div>
-                <div class="item">
-                    <strong>1. 定價策略：</strong>考慮提供更實惠的方案<br>
-                    <strong>2. 功能改進：</strong>增加離線功能<br>
-                    <strong>3. 品質提升：</strong>優化聲音自然度<br>
-                    <strong>4. 平台擴展：</strong>開發行動版 App
-                </div>
-                
-                ${linksHtml}
-                
-                <div style="margin-top:24px">
-                    <button class="btn btn-primary" onclick="window.open('${PLATFORMS[platforms[0]].search.replace('{keyword}', encodeURIComponent(keyword))}', '_blank')">前往搜尋結果</button>
-                </div>
-            `;
-            
-            document.getElementById('resultsContent').innerHTML = resultsHtml;
-            switchTab('results');
-        }
-    </script>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ─── Navigation ───
+function navigateTo(id) {
+    window.location.hash = `#/news/${id}`;
+}
+
+function goHome() {
+    window.location.hash = '';
+    document.getElementById('view-home').classList.add('active');
+    document.getElementById('view-detail').classList.remove('active');
+    currentCategory = 'all';
+    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+    document.querySelector('.filter-tag[data-cat="all"]').classList.add('active');
+    renderCards();
+}
+
+function showDetail(id) {
+    const n = news.find(x => x.id === id);
+    if (!n) { goHome(); return; }
+
+    document.getElementById('view-home').classList.remove('active');
+    document.getElementById('view-detail').classList.add('active');
+
+    const tagLabels = { tech: '科技', product: '產品', market: '市場', trend: '趨勢' };
+    const content = n.content || `<p>${n.summary}</p>`;
+
+    document.getElementById('detailContent').innerHTML = `
+        <div class="detail-hero-img">
+            ${n.image ? `<img src="${n.image}" alt="${n.title}" onerror="this.style.display='none';this.parentElement.innerHTML='📰'">` : '📰'}
+        </div>
+        <h1 class="detail-title">${n.title}</h1>
+        <div class="detail-meta">
+            <span class="news-card-tag news-card-tag.${n.category}" style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--${n.category === 'tech' ? 'primary' : n.category === 'product' ? 'purple' : n.category === 'market' ? 'accent' : 'warning'})22;color:var(--${n.category === 'tech' ? 'primary' : n.category === 'product' ? 'purple' : n.category === 'market' ? 'accent' : 'warning'})">${tagLabels[n.category]}</span>
+            <span class="detail-date">📅 ${n.date}</span>
+            <span class="detail-source">🏢 ${n.source || '市場研究論壇'}</span>
+            ${n.author ? `<span class="detail-author">👤 ${n.author}</span>` : ''}
+        </div>
+        <div class="detail-body">${content}</div>
+        ${n.tags && n.tags.length ? `<div class="detail-tags">${n.tags.map(t => `<span class="detail-tag"># ${t}</span>`).join('')}</div>` : ''}
+    `;
+}
+
+// ─── Category Filter ───
+function setCategory(btn) {
+    document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    currentCategory = btn.dataset.cat;
+    renderCards();
+}
+
+// ─── Modal ───
+function showAddModal(id) {
+    editingId = id || null;
+    document.getElementById('modalTitle').textContent = id ? '編輯新聞' : '新增新聞';
+    document.getElementById('deleteBtn').style.display = id ? 'block' : 'none';
+
+    if (id) {
+        const n = news.find(x => x.id === id);
+        document.getElementById('editId').value = id;
+        document.getElementById('fTitle').value = n.title;
+        document.getElementById('fSummary').value = n.summary;
+        document.getElementById('fContent').value = n.content || '';
+        document.getElementById('fImage').value = n.image || '';
+        document.getElementById('fCategory').value = n.category;
+        document.getElementById('fSource').value = n.source || '';
+        document.getElementById('fAuthor').value = n.author || '';
+        document.getElementById('fDate').value = n.date;
+    } else {
+        document.getElementById('editId').value = '';
+        ['fTitle','fSummary','fContent','fImage','fSource','fAuthor'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('fCategory').value = 'tech';
+        document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    document.getElementById('newsModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('newsModal').classList.remove('show');
+    editingId = null;
+}
+
+function saveNews() {
+    const title = document.getElementById('fTitle').value.trim();
+    const summary = document.getElementById('fSummary').value.trim();
+    if (!title || !summary) { showToast('請填寫標題和摘要', 'error'); return; }
+
+    const entry = {
+        id: editingId || Date.now(),
+        title,
+        summary,
+        content: document.getElementById('fContent').value.trim() || summary,
+        image: document.getElementById('fImage').value.trim(),
+        category: document.getElementById('fCategory').value,
+        source: document.getElementById('fSource').value.trim(),
+        author: document.getElementById('fAuthor').value.trim(),
+        date: document.getElementById('fDate').value || new Date().toISOString().split('T')[0],
+        tags: []
+    };
+
+    if (editingId) {
+        const idx = news.findIndex(n => n.id === editingId);
+        if (idx !== -1) news[idx] = entry;
+    } else {
+        news.unshift(entry);
+    }
+
+    saveNewsToStorage();
+    closeModal();
+    renderCards();
+    showToast(editingId ? '新聞已更新' : '新聞已新增', 'success');
+}
+
+function deleteNews() {
+    if (!editingId) return;
+    if (!confirm('確定要刪除這篇新聞？')) return;
+    news = news.filter(n => n.id !== editingId);
+    saveNewsToStorage();
+    closeModal();
+    goHome();
+    showToast('新聞已刪除', 'success');
+}
+
+function saveNewsToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(news));
+}
+
+// ─── Toast ───
+function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (type ? ' ' + type : '');
+    setTimeout(() => t.classList.add('show'), 10);
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── Init ───
+init();
+</script>
 </body>
 </html>
