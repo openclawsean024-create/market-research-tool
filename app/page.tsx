@@ -41,9 +41,9 @@ const PLATFORM_COLORS: Record<string, string> = {
 };
 
 const PLATFORM_ICONS: Record<string, string> = {
-  twitter: "𝕏",
-  facebook: "f",
-  instagram: "📷",
+  twitter: "X",
+  facebook: "Fb",
+  instagram: "Ig",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -76,7 +76,7 @@ export default function MarketResearchPage() {
     <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bg-primary)" }}>
       <div className="text-center">
         <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: "var(--accent-dim)", border: "1px solid rgba(99,102,241,0.2)" }}>
-          <span className="text-3xl pulse">📊</span>
+          <svg className="w-10 h-10 pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
         </div>
         <p className="text-zinc-500 font-medium">Collecting trends across platforms...</p>
       </div>
@@ -141,14 +141,14 @@ export default function MarketResearchPage() {
         {/* Stats row */}
         <div className="grid grid-cols-4 gap-4 mb-10">
           {[
-            { label: "TOPICS COLLECTED", value: data.total, icon: "📊", color: "var(--accent)" },
-            { label: "AVG VIDEO SCORE", value: avgScore, icon: "🎬", color: "var(--green)" },
-            { label: "PLATFORMS", value: 3, icon: "🌐", color: "var(--orange)" },
-            { label: "BREAKING NOW", value: data.top20.filter(t => t.urgency === "breaking").length, icon: "🚨", color: "var(--red)" },
+            { label: "TOPICS COLLECTED", value: data.total, icon: "CHART", color: "var(--accent)" },
+            { label: "AVG VIDEO SCORE", value: avgScore, icon: "CLIP", color: "var(--green)" },
+            { label: "PLATFORMS", value: 3, icon: "WEB", color: "var(--orange)" },
+            { label: "BREAKING NOW", value: data.top20.filter(t => t.urgency === "breaking").length, icon: "ALERT", color: "var(--red)" },
           ].map(stat => (
             <div key={stat.label} className="stat-card">
               <div className="flex items-center gap-2 mb-2">
-                <span>{stat.icon}</span>
+                <span className="text-xs font-bold tracking-[0.15em] text-zinc-500 uppercase">{stat.icon}</span>
                 <span className="text-[10px] font-bold tracking-[0.2em] text-zinc-600 uppercase">{stat.label}</span>
               </div>
               <div className="text-3xl font-black" style={{ color: stat.color, fontFamily: "var(--font-jetbrains)" }}>{stat.value}</div>
@@ -170,7 +170,7 @@ export default function MarketResearchPage() {
                   border: `1px solid ${filter === f ? "var(--accent)" : "var(--border)"}`,
                 }}
               >
-                {f === "all" ? "All Topics" : f === "breaking" ? "🔥 Breaking" : "📈 Trending"}
+                {f === "all" ? "All Topics" : f === "breaking" ? "Breaking" : "Trending"}
               </button>
             ))}
           </div>
@@ -186,7 +186,7 @@ export default function MarketResearchPage() {
                   border: `1px solid ${platformFilter === p ? (p === "all" ? "var(--accent)" : "var(--border)") : "var(--border)"}`,
                 }}
               >
-                {p === "all" ? "🌐 All" : `${PLATFORM_ICONS[p]} ${p}`}
+                {p === "all" ? "ALL" : `${PLATFORM_ICONS[p]} ${p}`}
               </button>
             ))}
           </div>
@@ -223,7 +223,7 @@ export default function MarketResearchPage() {
                     topic.urgency === "trending" ? "urgent-trending" : "urgent-evergreen"
                   }`}
                 >
-                  {topic.urgency === "breaking" ? "🚨 BREAKING" : topic.urgency === "trending" ? "📈 TRENDING" : "🌿 EVERGREEN"}
+                  {topic.urgency === "breaking" ? "BREAKING" : topic.urgency === "trending" ? "TRENDING" : "EVERGREEN"}
                 </span>
               </div>
 
@@ -293,7 +293,7 @@ export default function MarketResearchPage() {
               <div className="flex flex-wrap gap-1">
                 {topic.targetAudience.slice(0, 2).map((aud, i) => (
                   <span key={i} className="text-[10px] font-medium text-zinc-600 bg-zinc-900 rounded px-2 py-0.5">
-                    👥 {aud}
+                    {aud}
                   </span>
                 ))}
               </div>
