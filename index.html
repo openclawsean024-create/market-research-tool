@@ -478,7 +478,7 @@ function showDetail(id) {
             <span class="news-card-tag news-card-tag.${n.category}" style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:var(--${n.category === 'tech' ? 'primary' : n.category === 'product' ? 'purple' : n.category === 'market' ? 'accent' : 'warning'})22;color:var(--${n.category === 'tech' ? 'primary' : n.category === 'product' ? 'purple' : n.category === 'market' ? 'accent' : 'warning'})">${tagLabels[n.category]}</span>
             <span class="detail-date"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ${n.date}</span>
             <span class="detail-source"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg> ${n.source || '市場研究論壇'}</span>
-            ${n.author ? `<span class="detail-author">👤 ${n.author}</span>` : ''}
+            ${n.author ? `<span class="detail-author"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${n.author}</span>` : ''}
         </div>
         <div class="detail-body">${content}</div>
         ${n.tags && n.tags.length ? `<div class="detail-tags">${n.tags.map(t => `<span class="detail-tag"># ${t}</span>`).join('')}</div>` : ''}
